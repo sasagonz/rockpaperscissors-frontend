@@ -1,0 +1,22 @@
+<h2>ROUNDS</h2>
+<button (click)="play()">Play</button>
+<button (click)="reset()">Reset</button>
+<div *ngIf="rounds">
+    <label>
+        Total rounds: {{rounds.length}}
+    </label>
+</div>
+<table>
+    <thead>
+        <th>PLAYER1</th>
+        <th>PLAYER2</th>
+        <th>WINNER</th>
+    </thead>
+    <tbody>
+        <tr *ngFor="let round of rounds">
+            <td>{{round.player1}}</td>
+            <td>{{round.player2}}</td>
+            <td>{{round.result}}</td>
+        </tr>
+    </tbody>
+</table>
