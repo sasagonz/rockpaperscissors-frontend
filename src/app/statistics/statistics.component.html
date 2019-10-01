@@ -1,0 +1,16 @@
+<table *ngIf="statistic">
+    <thead>
+        <th>Total Rounds</th>
+        <th>Total Wins for Player 1</th>
+        <th>Total Wins for Player 2</th>
+        <th>Total drawns</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{statistic.totalRoundsPlayed}}</td>
+            <td>{{statistic.totalWinsFirstPlayer}}</td>
+            <td>{{statistic.totalWinsSecondPlayer}}</td>
+            <td>{{statistic.totalDrawns}}</td>
+        </tr>
+    </tbody>
+</table>

@@ -5,13 +5,15 @@ import { Shape } from './shape';
 import { Game } from './game';
 import { Observable, throwError } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
+import { Statistic } from './statistic';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RockPaperScissorsService {
 
-  apiURL = 'http://localhost:8080/rockpaperscissors';
+  customersURL = 'http://localhost:8080/rockpaperscissors/customers';
+  statisticsURL = 'http://localhost:8080/rockpaperscissors/rounds/statistics';
 
   constructor(private httpClient: HttpClient) { }
 
@@ -21,8 +23,12 @@ export class RockPaperScissorsService {
     })
   };
 
+  public getStatistics() {
+    return this.httpClient.get<Statistic>(this.statisticsURL);
+  }
+
   public getRounds() {
-    return this.httpClient.get<Round[]>(`${this.apiURL}/customers/1/rounds`);
+    return this.httpClient.get<Round[]>(`${this.customersURL}/1/rounds`);
   }
 
   public play(player1: Shape, player2: Shape): Observable<Round> {
@@ -30,7 +36,7 @@ export class RockPaperScissorsService {
     return this
       .httpClient
       .post<Round>(
-        `${this.apiURL}/customers/1/rounds`,
+        `${this.customersURL}/1/rounds`,
         JSON.stringify(game),
         this.httpOptions)
       .pipe(
@@ -38,9 +44,11 @@ export class RockPaperScissorsService {
         catchError(this.handleError));
   }
 
-  public reset() {
-    this.httpClient.delete(`${this.apiURL}/customers/1/rounds`);
+  public reset(): Observable<string> {
+    return this.httpClient.delete<string>(`${this.customersURL}/1/rounds`);
   }
+
+
 
   // Error handling
   handleError(error:

@@ -31,8 +31,7 @@ export class RoundsTableComponent implements OnInit {
   }
 
   public reset() {
-    this.rockPaperScissorsService.reset();
-    this.rounds = [];
+    this.rockPaperScissorsService.reset().subscribe(() => this.rounds = []);
   }
 
   randomShape(): Shape {
