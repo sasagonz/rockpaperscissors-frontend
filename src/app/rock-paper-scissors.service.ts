@@ -23,20 +23,24 @@ export class RockPaperScissorsService {
     })
   };
 
+  public createCustomer() {
+    return this.httpClient.post<string>(this.customersURL, null);
+  }
+
   public getStatistics() {
     return this.httpClient.get<Statistic>(this.statisticsURL);
   }
 
-  public getRounds() {
-    return this.httpClient.get<Round[]>(`${this.customersURL}/1/rounds`);
+  public getRounds(customerId: string) {
+    return this.httpClient.get<Round[]>(`${this.customersURL}/${customerId}/rounds`);
   }
 
-  public play(player1: Shape, player2: Shape): Observable<Round> {
+  public play(customerId: string, player1: Shape, player2: Shape): Observable<Round> {
     const game = new Game(player1, player2);
     return this
       .httpClient
       .post<Round>(
-        `${this.customersURL}/1/rounds`,
+        `${this.customersURL}/${customerId}/rounds`,
         JSON.stringify(game),
         this.httpOptions)
       .pipe(
@@ -44,8 +48,8 @@ export class RockPaperScissorsService {
         catchError(this.handleError));
   }
 
-  public reset(): Observable<string> {
-    return this.httpClient.delete<string>(`${this.customersURL}/1/rounds`);
+  public reset(customerId: string): Observable<string> {
+    return this.httpClient.delete<string>(`${this.customersURL}/${customerId}/rounds`);
   }
 
 
