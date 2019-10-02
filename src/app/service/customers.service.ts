@@ -1,19 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Round } from './round';
-import { Shape } from './shape';
-import { Game } from './game';
+import { RoundResult } from '../model/round-result';
+import { Shape } from '../model/shape';
+import { RoundRequest } from '../model/round-request';
 import { Observable, throwError } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
-import { Statistic } from './statistic';
 
 @Injectable({
   providedIn: 'root'
 })
-export class RockPaperScissorsService {
+export class CustomersService {
 
   customersURL = 'http://localhost:8080/rockpaperscissors/customers';
-  statisticsURL = 'http://localhost:8080/rockpaperscissors/rounds/statistics';
 
   constructor(private httpClient: HttpClient) { }
 
@@ -24,24 +22,30 @@ export class RockPaperScissorsService {
   };
 
   public createCustomer() {
-    return this.httpClient.post<string>(this.customersURL, null);
-  }
-
-  public getStatistics() {
-    return this.httpClient.get<Statistic>(this.statisticsURL);
-  }
-
-  public getRounds(customerId: string) {
-    return this.httpClient.get<Round[]>(`${this.customersURL}/${customerId}/rounds`);
-  }
-
-  public play(customerId: string, player1: Shape, player2: Shape): Observable<Round> {
-    const game = new Game(player1, player2);
     return this
       .httpClient
-      .post<Round>(
+      .post<string>(this.customersURL, null)
+      .pipe(
+        retry(1),
+        catchError(this.handleError));
+  }
+
+  public getRounds(customerId: string): Observable<RoundResult[]> {
+    return this
+      .httpClient
+      .get<RoundResult[]>(`${this.customersURL}/${customerId}/rounds`)
+      .pipe(
+        retry(1),
+        catchError(this.handleError));
+  }
+
+  public play(customerId: string, player1: Shape, player2: Shape): Observable<RoundResult> {
+    const roundRequest = new RoundRequest(player1, player2);
+    return this
+      .httpClient
+      .post<RoundResult>(
         `${this.customersURL}/${customerId}/rounds`,
-        JSON.stringify(game),
+        JSON.stringify(roundRequest),
         this.httpOptions)
       .pipe(
         retry(1),
@@ -49,12 +53,14 @@ export class RockPaperScissorsService {
   }
 
   public reset(customerId: string): Observable<string> {
-    return this.httpClient.delete<string>(`${this.customersURL}/${customerId}/rounds`);
+    return this
+      .httpClient
+      .delete<string>(`${this.customersURL}/${customerId}/rounds`)
+      .pipe(
+        retry(1),
+        catchError(this.handleError));
   }
 
-
-
-  // Error handling
   handleError(error:
     {
       error: {
@@ -65,10 +71,8 @@ export class RockPaperScissorsService {
     }) {
     let errorMessage = '';
     if (error.error instanceof ErrorEvent) {
-      // Get client-side error
       errorMessage = error.error.message;
     } else {
-      // Get server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
     console.log(errorMessage);
