@@ -1,53 +1,65 @@
 import { Component, OnInit } from '@angular/core';
-import { Round } from '../round';
-import { RockPaperScissorsService } from '../rock-paper-scissors.service';
-import { Shape } from '../shape';
+import { RoundResult } from '../model/round-result';
+import { CustomersService } from '../service/customers.service';
+import { Shape } from '../model/shape';
 import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-rounds-table',
   templateUrl: './rounds-table.component.html',
   styleUrls: ['./rounds-table.component.css'],
-  providers: [RockPaperScissorsService]
+  providers: [CustomersService]
 })
 export class RoundsTableComponent implements OnInit {
 
-  rounds: Round[];
+  roundResults: RoundResult[];
   customerId: string;
 
-  constructor(private cookieService: CookieService, private rockPaperScissorsService: RockPaperScissorsService) { }
+  constructor(private cookieService: CookieService, private customersService: CustomersService) { }
 
   ngOnInit() {
     if (!this.cookieService.check('customerId')) {
-      this.rockPaperScissorsService.createCustomer().subscribe(customerId => {
+      this.customersService.createCustomer().subscribe(customerId => {
         this.cookieService.set('customerId', customerId);
-        this.customerId = this.cookieService.get('customerId');
-        this.getRounds();
+        this.getCookieAndGetRounds();
       });
     } else {
-      this.customerId = this.cookieService.get('customerId');
-      this.getRounds();
+      this.getCookieAndGetRounds();
     }
   }
 
+  getCookieAndGetRounds() {
+    this.customerId = this.cookieService.get('customerId');
+    this.getRounds();
+  }
+
   getRounds() {
-    this.rockPaperScissorsService.getRounds(this.customerId).subscribe((data: Round[]) => {
-      console.log(data);
-      this.rounds = data;
-    });
+    this
+      .customersService
+      .getRounds(this.customerId)
+      .subscribe((data: RoundResult[]) => {
+        console.log(data);
+        this.roundResults = data;
+      });
   }
 
   public play() {
-    this.rockPaperScissorsService.play(this.customerId, Shape.Rock, this.randomShape()).subscribe(data => this.rounds.push(data));
+    this
+      .customersService
+      .play(this.customerId, Shape.Rock, this.randomShape())
+      .subscribe(data => this.roundResults.push(data));
   }
 
   public reset() {
-    this.rockPaperScissorsService.reset(this.customerId).subscribe(() => this.rounds = []);
+    this
+      .customersService
+      .reset(this.customerId)
+      .subscribe(() => this.roundResults = []);
   }
 
   randomShape(): Shape {
     const values = Object.keys(Shape);
-    const enumKey = values[Math.floor(Math.random()*values.length)];
+    const enumKey = values[Math.floor(Math.random() * values.length)];
     return Shape[enumKey];
   }
 }
